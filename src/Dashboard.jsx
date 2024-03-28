@@ -8,6 +8,73 @@ const Dashboard = () => {
   const [userData, setUserData] = useState(null); // Zustand für Benutzerdaten
   let { id } = useParams();
   const navigate = useNavigate();
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [newProfileData, setNewProfileData] = useState({
+    image: '',
+    username: '',
+    email: '',
+    password: '',
+  });
+
+  useEffect(() => {
+    if (userData) {
+      setNewProfileData({
+        image: userData.profile.image,
+        username: userData.username,
+        email: userData.email,
+        password: '',
+      });
+    }
+  }, [userData]);
+
+  const handleProfileDataChange = (event) => {
+    if (event.target.name === 'image') {
+      setNewProfileData({
+        ...newProfileData,
+        [event.target.name]: event.target.files[0],
+      });
+    } else {
+      setNewProfileData({
+        ...newProfileData,
+        [event.target.name]: event.target.value,
+      });
+    }
+  };
+
+  const handleProfileUpdate = () => {
+    const formData = new FormData();
+    for (const key in newProfileData) {
+      if (newProfileData[key] !== '') {
+        formData.append(key, newProfileData[key]);
+      }
+    }
+  
+    fetch(`http://localhost:8000/users/${userData.id}/`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Token ${localStorage.getItem('Token')}`,
+      },
+      body: formData,
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data) {
+          setUserData(data);
+          setIsEditingProfile(false);
+        } else {
+          throw new Error('Invalid data');
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        alert('Error:', error.message);
+      });
+  };
 
   function fetchUserData() {
     const backendURL = 'http://localhost:8000/users/';
@@ -85,11 +152,12 @@ const Dashboard = () => {
     })
     .then(response => response.json())
     .then(data => {
-      fetchUserData();  
+      
       console.log('Success:', data);
       console.log(localStorage.getItem('id'));
       console.log(localStorage.getItem('Token'));
       console.log(userData.id);
+      window.location.reload();
     })
     .catch((error) => {
       console.error('Error:', error);
@@ -107,6 +175,8 @@ const Dashboard = () => {
       },  
     })
     fetchUserData();
+    window.location.reload();
+
 
     // Send a request to the backend to accept the friend request
     // Then fetch the userData again to update the list of friend requests
@@ -115,33 +185,44 @@ const Dashboard = () => {
   
      
       navigate('/'); // Navigiere zur Startseite, wenn der "Zurück"-Button geklickt wird
+      window.location.reload();
     };
   
-    const handleOut= () => {
+    const handleOut = () => {
       localStorage.removeItem('Token'); 
       localStorage.removeItem('id');
       navigate('/'); // Navigiere zur Startseite, wenn der "Zurück"-Button geklickt wird
+      window.location.reload();
     };
+
+    const changeProfil = () => {
+      if (isEditingProfile) {
+        setIsEditingProfile(false);
+        return;
+      }
+      setIsEditingProfile(true);
+    };
+
+    const handleChat = () => {
+      navigate(`/Chat`);
+    };
+    
   return (
     <div className="container mt-5">
-      {userData ? (
+      {userData && !isEditingProfile ? (
         <>
-          {userData.profile.is_current_user && <h1>Welcome to your profile, {userData.username}</h1>}
-          <Card style={{ width: '18rem' }}>
-            <Card.Img variant="top" src={userData.profile.image} />
+          <Card style={{ width: '24rem', paddingTop: '14rem'}}>
+            <Card.Img variant="top" src={userData.profile.image} style={{ objectFit: 'contain', width: '100%', height: '100%' }} />
             <Card.Body>
               <Card.Title>{userData.username}</Card.Title>
+              {userData.profile.is_online ? 'Online' : 'Offline'}
               <Card.Text>
-                Email: {userData.email}
+                Email: {userData.email} <br />
+                Games Won: {userData.profile.games_won} Games Lost: {userData.profile.games_lost}
               </Card.Text>
             </Card.Body>
-            <ListGroup variant="flush">
-              <ListGroup.Item>Games Won: {userData.profile.games_won}</ListGroup.Item>
-              <ListGroup.Item>Games Lost: {userData.profile.games_lost}</ListGroup.Item>
-            </ListGroup>
-
-            <Card.Body>
-              Friends:
+            Friends:
+            <Card.Body style={{ overflow: 'auto', maxHeight: '200px'}}>
               <ul>
               {userData.profile.friends.map((friend, index) => (
                 <li key={index}>
@@ -160,12 +241,47 @@ const Dashboard = () => {
               ))}
             </ul></div>}
             </Card.Body>
+              Game History
+              <Card.Body style={{ overflow: 'auto', maxHeight: '100px', display: 'flex', flexDirection: 'column' }}>
+              <ul style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
+                {userData.profile.games.map((game, index) => (
+                  <li key={index} style={{ flex: 1, width: '100%' }}>
+                    {new Date(game.created).toLocaleString()} | vs {game.opponent_username} | {game.p1_score} : {game.p2_score} {game.is_winner ? 'won' : 'lost'}
+                  </li>
+                ))}
+              </ul>
+            </Card.Body>
           </Card>
-          <button onClick={handleBack}>Back to menu</button>
-          <button onClick={handleOut}>Log Out</button>
+          {userData.profile.is_current_user && <div> <button className="btn btn-primary m-1" style={{width: '18rem', height: '2rem', backgroundColor: '#000000', color: '#ffffff'}} onClick={changeProfil}>edit profile</button></div>}
+          <button className="btn btn-primary m-1" style={{width: '18rem', height: '2rem', backgroundColor: '#000000', color: '#ffffff'}} onClick={handleChat}>chat</button>
+          <button className="btn btn-primary m-1" style={{width: '18rem', height: '2rem', backgroundColor: '#000000', color: '#ffffff'}} onClick={handleBack}>back to menu</button>
+          <button className="btn btn-primary m-1" style={{width: '18rem', height: '2rem', backgroundColor: '#000000', color: '#ffffff'}} onClick={handleOut}>log out</button>
         </>
+        
       ) : (
-        <p>Loading...</p>
+        <div className="container">
+        <form>
+          <div className="mb-3">
+            <label className="form-label">Choose your new profile picture</label>
+            <input type="file" className="form-control" name="image" onChange={handleProfileDataChange} />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Username</label>
+            <input type="text" className="form-control" name="username" value={newProfileData.username} onChange={handleProfileDataChange} />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Email</label>
+            <input type="email" className="form-control" name="email" value={newProfileData.email} onChange={handleProfileDataChange} />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Password</label>
+            <input type="password" className="form-control" name="password" value={newProfileData.password} onChange={handleProfileDataChange} />
+          </div>
+          <button className="btn btn-primary mb-2" style={{ height:'30px', backgroundColor: '#000000', color: '#ffffff'}} onClick={handleProfileUpdate}>update profile</button>
+         
+          <button className="btn btn-secondary mb-2" style={{ height:'30px', backgroundColor: '#000000', color: '#ffffff'}} onClick={changeProfil}>cancel</button>
+        </form>
+      </div>
       )}
     </div>
   );}

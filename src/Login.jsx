@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 /* eslint-disable */
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, Form } from 'react-router-dom';
 import Dashboard from './Dashboard';
 import './css/Login.css';
 import Cookies from 'js-cookie';
@@ -84,51 +84,37 @@ const handleRegister = () => {
 		alert('Please enter the required fields');
 		return;
 	  }
-	  const userData = {
-		"username" : username,
-		"email" : email,
-		"password" : password,
-		"password2" : password,
-	  };
-	
-	  // Backend-URL anpassen
+	  const formData =  new FormData();
+
+	  	formData.append('username', username);
+		formData.append('email', email);
+		formData.append('password', password);
+		formData.append('password2', password);
+
 	  const backendURL = 'http://localhost:8000/register/';
-	
-	  // Fetch-Anfrage senden
+
 	  fetch(backendURL, {
 		method: 'POST',
-		headers: {
-		  'Content-Type': 'application/json'
-		},
-		body: JSON.stringify(userData)
+		body: formData
 	  })
 	  .then(response => {
 		if (response.ok) {
-		  // Die Antwort des Servers in JSON umwandeln
 		  return response.json();
 		} else {
 		  throw new Error('Network response was not ok.');
 		}
 	  })
 	  .then(data => {
-		// Den Token aus der Antwort extrahieren
 		const token = data.token;
 		const id = data.user.id;
-		// Den Token lokal speichern
 		localStorage.setItem('Token', token);
 		localStorage.setItem('id', id);
-	
-		// Weiterleiten oder andere Aktionen ausführen
-		navigate('/dashboard');
+		navigate(`/dashboard/${id}/`);
 	  })
 	  .catch(error => {
 		console.error('Fehler beim Senden der Registrierungsdaten:', error);
 		alert('Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.');
 	  });
-	
-
-	// Leite den Benutzer zur Dashboard-Seite weiter
-	
   };
   
 
@@ -137,7 +123,7 @@ const handleRegister = () => {
 		setRegistering(false);
 		return
 	}
-    navigate('/'); // Navigiere zur Startseite, wenn der "Zurück"-Button geklickt wird
+    navigate('/');
   };
 	return (
 		<div className='container'>
