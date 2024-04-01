@@ -9,6 +9,7 @@ import Dashboard from './Dashboard';
 import OnlineGame from './OnlineGame';
 import React, { useState, useEffect } from 'react';
 import OnlineTournament from './OnlineTournament';
+import OnlineGameM from './OnlineGameM';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
@@ -52,7 +53,7 @@ function App() {
                         local game
                       </button>
                     </Link>
-                    {isLoggedIn && (<Link to="/OnlineGame">
+                    {isLoggedIn && (<Link to="/OnlineGameM">
                       <button className="btn btn-primary m-2" style={{width: '18rem', height: '2rem', backgroundColor: '#000000', color: '#ffffff'}}>
                         online game
                       </button>
@@ -80,6 +81,8 @@ function App() {
           <Route path="/chat" element={<Chat />} />
           <Route path="/OnlineGame" element={<OnlineGame />} />
           <Route path='/onlineTournament' element={<OnlineTournament />} />
+          <Route path="/OnlineGameM" element={<OnlineGameM />} />
+       
         </Routes>
       </div>
     </Router>

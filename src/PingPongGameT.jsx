@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import './css/PingPongGame.css';
 
-const PingPongGameT = ({ player1, player2, onFinish }) => {
+const PingPongGameT = ({ player1, player2}) => {
   const [ballPosition, setBallPosition] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 }); // Ball außerhalb des Bildschirms platzieren
   const [ballVelocity, setBallVelocity] = useState({ xx: 0, y: 0}); // Ballgeschwindigkeit auf 0 setzen
   const [leftpaddlePosition, leftsetPaddlePosition] = useState(window.innerHeight / 2 - 50);
@@ -23,7 +23,7 @@ const PingPongGameT = ({ player1, player2, onFinish }) => {
  /* check game over*/
   const checkGameOver = () => {
     if (score.left >=2) {
-      // setGameOver(true);
+      setGameOver(true);
       setWinner(player1);
     } else if (score.right >=2){
       setWinner(player2)
@@ -31,10 +31,20 @@ const PingPongGameT = ({ player1, player2, onFinish }) => {
   };
 
   useEffect(() => {
-    if(winner){
-      onFinish(winner);
+    if (gameOver) {
+      if (!localStorage.getItem('winner_1')) {
+        localStorage.setItem('winner_1', winner);
+       }
+       else if (!localStorage.getItem('winner_2')) {
+        localStorage.setItem('winner_2', winner);
+       } 
+       else {
+        localStorage.setItem('t_winner', winner);
+       }
+        // Speichern des Gewinners im Local Storage
+      window.location.reload(); // Seite neu laden, um das Spiel zurückzusetzen
     }
-  }, [winner, onFinish]);
+  }, [gameOver, winner]);
 
   useEffect(() => {
     checkGameOver();

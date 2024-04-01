@@ -132,7 +132,10 @@ const Chat = () => {
 			.catch((error) => {
 			console.error('Error:', error);
 			});
+		localStorage.setItem('friendID', friend.id);
+		navigate(`/OnlineGame/`);
 	  };
+
 
 	  return (
 		<div className="row">

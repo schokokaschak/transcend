@@ -1,5 +1,7 @@
+import usePagination from '@mui/material/usePagination/usePagination';
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from 'react-bootstrap';
+import { useParams } from 'react-router-dom';
 
 const OnlineGame = () => {
 
@@ -16,15 +18,13 @@ const OnlineGame = () => {
   const playersRef = useRef(players);
   const playerIDRef = useRef(playerId);
   const playerNumRef = useRef(playerNum);
+ 
 
   const startGame = () => {
-	var idd = 1;
-	if (localStorage.getItem('id') === '1') {
-		idd = 2;
-	}
-	console.log('id:', idd);
-    const websocket = new WebSocket('ws://localhost:8000/ws/game_consumer/' + idd + '/?token=' + localStorage.getItem('Token'));
-   
+	
+	const idd = localStorage.getItem('friendID');
+    const websocket = new WebSocket('ws://localhost:8000/ws/private_game/' + idd + '/?token=' + localStorage.getItem('Token'));
+	localStorage.removeItem('friendID');
     websocket.onopen = () => {
       console.log('WebSocket connection opened');
     };
@@ -74,7 +74,7 @@ const OnlineGame = () => {
 			
 		}
         
-      } else if (message.type === 'game_over') {
+      } else if (message.type === 'game_end') {
         console.log('Received game_over:', message);
         if (websocket) {
           websocket.close();
@@ -125,7 +125,6 @@ const OnlineGame = () => {
 	}
   };
   
-
   return (
     <div style={{ position: 'relative', height: 480 + 'px', width: 480 + 'px' }}>
       {!gameStarted ? (
