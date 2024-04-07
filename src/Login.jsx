@@ -138,10 +138,10 @@ const handleRegister = () => {
 			</label>
 			<br />
 			{!registering && ( <div>
-			<button onClick={handleLogin}>Login</button>
-			<br />
-			<button onClick={() => setRegistering(true)}>Register</button>
-			<br /> </div>)}
+			<button className="btn btn-secondary mb-2" style={{ height:'25px', backgroundColor: '#000000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center'}} onClick={handleLogin}>Login</button>
+			
+			<button className="btn btn-secondary mb-2" style={{ height:'25px', backgroundColor: '#000000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center'}} onClick={() => setRegistering(true)}>Register</button>
+			</div>)}
 			{registering && ( <div>
 				<label>
 				Email:<br />
@@ -153,8 +153,8 @@ const handleRegister = () => {
 				<input type="alias" value={alias} onChange={handleAliasChange} />
 			</label>
 			<br />
-				<button onClick={handleRegister}>complete register</button> </div>)}
-			<button onClick={handleBack}>Back</button>
+				<button className="btn btn-secondary mb-2" style={{ height:'25px', backgroundColor: '#000000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center'}} onClick={handleRegister}>complete register</button> </div>)}
+			<button  className="btn btn-secondary mb-2" style={{ height:'25px', backgroundColor: '#000000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center'}}onClick={handleBack}>Back</button>
 		</div>
 	);
 }

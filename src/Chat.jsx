@@ -150,7 +150,7 @@ const Chat = () => {
 					style={selectedFriend && selectedFriend.participant2.username === chat.participant2.username ? { backgroundColor: '#000000', color: '#ffffff' } : {}}
 					>
 					{chat.participant2.username}
-					<Button variant="primary" onClick={(e) => {e.stopPropagation(); handleInviteClick(chat.participant2);}}>Invite</Button>
+					<Button variant="primary" className="btn btn-secondary mb-2" style={{ height:'25px', backgroundColor: '#000000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center'}}onClick={(e) => {e.stopPropagation(); handleInviteClick(chat.participant2);}}>invite to a game</Button>
 					</ListGroupItem>
 				)) : "Loading..."}
 				</ListGroup>

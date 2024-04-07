@@ -1,20 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, CardTitle, ListGroup } from 'react-bootstrap';
+import { Card, CardTitle} from 'react-bootstrap';
 /* eslint-disable */
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 
-const Dashboard = () => {
+const Dashboard = (props) => {
   const [userData, setUserData] = useState(null); // Zustand für Benutzerdaten
   let { id } = useParams();
   const navigate = useNavigate();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [notification, setNotification] = useState(null);
   const [newProfileData, setNewProfileData] = useState({
     image: '',
     username: '',
     email: '',
     password: '',
   });
+  const {socket} = props;
+
+  useEffect(() => {
+    if (socket == null) return;
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      console.log(data);
+      setNotification(data);
+      setTimeout(() => {
+        setNotification(null);
+      }, 5000);
+    };
+  }, [socket]);
 
   useEffect(() => {
     if (userData) {
@@ -255,13 +271,14 @@ const Dashboard = () => {
     
     return (
       <div className="container mt-5">
+        {notification && <div className="notification" style={{position: 'fixed', top: 0, right: 0, backgroundColor: 'lightblue', padding: '10px'}}>{notification.message}</div>}
         {userData && !isEditingProfile ? (
           <>
           <div style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'row', height: '100vh'}}>
             <Card style={{ flex: '1', width: '30vw', paddingTop: '1rem', maxHeight: '50vh'}}>
               
               <Card.Body style={{ overflow: 'auto', maxHeight: '100%'}}>
-              <Card.Img variant="top" src={userData.profile.image} style={{ objectFit: 'contain', maxHeight: '100%' }} />
+              <Card.Img variant="top" src={userData.profile.image} style={{ objectFit: 'contain', maxHeight: '50%' }} />
                 <Card.Title>{userData.username}</Card.Title>
                 {userData.profile.is_online ? 'Online' : 'Offline'}
                 <Card.Text>
@@ -281,35 +298,37 @@ const Dashboard = () => {
                   </li>
                 ))}
               </ul>
-                {!userData.profile.is_current_user && !userData.profile.already_sent_request && <button onClick={addFriend}>Add Friend</button>}
+                {!userData.profile.is_current_user && !userData.profile.already_sent_request && <button className="btn btn-primary m-1" style={{width: '18rem', height: '2rem', backgroundColor: '#000000', color: '#ffffff'}} onClick={addFriend}>Add Friend</button>}
                 {userData.profile.is_current_user && <div>Friend Requests:
               <ul>
                 {userData.profile.to_user.map((request, index) => (
                   <li key={index}>
                     {request.from_user_username}
-                    <button onClick={() => acceptFriendRequest(request.id)}>Accept</button>
+                    <button className="btn btn-primary m-1" style={{width: '18rem', height: '2rem', backgroundColor: '#000000', color: '#ffffff'}} onClick={() => acceptFriendRequest(request.id)}>Accept</button>
                   </li>
                 ))}
               </ul></div>}
               </Card.Body>
               </Card>
+              {userData.profile.is_current_user && (
               <Card style={{ flex: '1', width: '30vw', paddingTop: '1rem'}}>
-              <CardTitle>Game Invites</CardTitle>
-            <Card.Body style={{ overflow: 'auto', maxHeight: '100%'}}>
-              <div >
-                {userData.profile.game_invites_received.map((invite, index) => (
-                  <div key={index}>
-                    <Card.Text>
-                      From: {invite.from_user} <br />
-                      Date: {new Date(invite.created).toLocaleString()}
-                    </Card.Text>
-                    <button onClick={() => acceptInvite(invite)}>Accept</button>
-                    <button onClick={() => declineInvite(invite)}>Decline</button>
+                <CardTitle>Game Invites</CardTitle>
+                <Card.Body style={{ overflow: 'auto', maxHeight: '100%'}}>
+                  <div >
+                    {userData.profile.game_invites_received.map((invite, index) => (
+                      <div key={index}>
+                        <Card.Text>
+                          From: {invite.from_user} <br />
+                          Date: {new Date(invite.created).toLocaleString()}
+                        </Card.Text>
+                        <button className="btn btn-secondary mb-2" style={{ height:'25px', backgroundColor: '#000000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center'}} onClick={() => acceptInvite(invite)}>Accept</button>
+                        <button className="btn btn-secondary mb-2" style={{ height:'25px', backgroundColor: '#000000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center'}} onClick={() => declineInvite(invite)}>Decline</button>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </Card.Body>
-          </Card>
+                </Card.Body>
+              </Card>
+              )}
               </div>
               <Card style={{ flex: '1', width: '30vw', paddingTop: '2rem'}}>
                 <CardTitle>Game History</CardTitle>
@@ -317,7 +336,7 @@ const Dashboard = () => {
                 <ul style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
                   {userData.profile.games.map((game, index) => (
                     <li key={index} style={{ flex: 1, width: '100%' }}>
-                      {new Date(game.created).toLocaleString()} | vs {game.opponent_username} | {game.p1_score} : {game.p2_score} {game.is_winner ? 'won' : 'lost'}
+                      {new Date(game.created).toLocaleString()} | vs <a href={`/dashboard/${game.opponent_id}`}>{game.opponent_username}</a> | {game.p1_score} : {game.p2_score} {game.is_winner ? 'won' : 'lost'}
                     </li>
                   ))}
                 </ul>

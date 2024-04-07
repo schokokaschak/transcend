@@ -1,7 +1,6 @@
-import usePagination from '@mui/material/usePagination/usePagination';
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from 'react-bootstrap';
-import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const OnlineGame = () => {
 
@@ -12,12 +11,12 @@ const OnlineGame = () => {
     { paddleY: 0, upPressed: false, downPressed: false, score: 0 },
   ]);
   const [ball, setBall] = useState({ x: 0, y: 0, r: 10 });
-  const [playerId, setPlayerId] = useState(null);
+  
   const [playerNum, setPlayerNum] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const playersRef = useRef(players);
-  const playerIDRef = useRef(playerId);
   const playerNumRef = useRef(playerNum);
+  const navigate = useNavigate();
  
 
   const startGame = () => {
@@ -40,7 +39,7 @@ const OnlineGame = () => {
     websocket.onmessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.type === 'playerNum') {
-        // setPlayerId(message.playerId);
+        
         setPlayerNum(message.playerNum);
 		console.log('Received playerNum:', message);
 		// websocket.send(
@@ -65,7 +64,6 @@ const OnlineGame = () => {
 			websocket.send(
 				JSON.stringify({
 					type: 'game_update',
-					// playerId: playerIDRef.current,
 					playerNum: playerNumRef.current,
 					upPressed: playersRef.current[0].upPressed,
 					downPressed: playersRef.current[0].downPressed,
@@ -79,6 +77,9 @@ const OnlineGame = () => {
         if (websocket) {
           websocket.close();
         }
+        setTimeout(() => {
+          handleBack();
+        }, 2000);
       }
     };
   };
@@ -94,12 +95,8 @@ const OnlineGame = () => {
   }, []);
 
   useEffect(() => {
-	playerIDRef.current = playerId;
-  }, [playerId]);
-
-  useEffect(() => {
-	playerNumRef.current = playerNum;
-  }	, [playerNum]);
+    playerNumRef.current = playerNum;
+    }	, [playerNum]);
 
   useEffect(() => {
     playersRef.current = players;
@@ -124,12 +121,17 @@ const OnlineGame = () => {
 	  console.log('down released');
 	}
   };
+
+  const handleBack = () => {
+    navigate('/'); // Navigiere zur Startseite, wenn der "Zurück"-Button geklickt wird
+};
   
   return (
     <div style={{ position: 'relative', height: 480 + 'px', width: 480 + 'px' }}>
       {!gameStarted ? (
         <div className="d-flex justify-content-center align-items-center" style={{ height: '100%' }}>
-          <Button variant="primary" onClick={startGame}>Start Game</Button>
+          <Button className="btn btn-secondary mb-2" style={{ height:'25px', backgroundColor: '#000000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center'}} variant="primary" onClick={startGame}>start game</Button>
+          <Button className="btn btn-secondary mb-2" style={{ height:'25px', backgroundColor: '#000000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center'}} variant="primary" onClick={handleBack}>back to menu</Button>
         </div>
       ) : (
         <>

@@ -110,13 +110,13 @@ const Tournament = () => {
                   <div>
                     <h2>Match {currentPairIndex + 1}</h2>
                     <p>{playerPairs[currentPairIndex][0]} VS {playerPairs[currentPairIndex][1]}</p>
-                    <Button variant="primary" onClick={handleStartGame}>Start Game</Button>
+                    <Button className="btn btn-secondary mb-2" style={{ height:'25px', backgroundColor: '#000000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center'}} variant="primary" onClick={handleStartGame}>start game</Button>
                   </div>
                 )}
               </>
             )}
             {!gameStarted && !winner && (
-              <Button variant="primary" size="lg" onClick={() => { localStorage.removeItem('tournament'); localStorage.removeItem('playerPairs'); setTournamentStarted(false); }}>New Tournament</Button>
+              <Button className="btn btn-secondary mb-2" style={{ height:'25px', backgroundColor: '#000000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center'}} variant="primary" size="lg" onClick={() => { localStorage.removeItem('tournament'); localStorage.removeItem('playerPairs'); setTournamentStarted(false); }}>new tournament</Button>
             )}
           </>
         ) : (
@@ -134,24 +134,23 @@ const Tournament = () => {
                     />
                   </Form.Group>
                 ))}
-                <Button variant="primary" type="submit">
-                  Start Tournament
+                <Button className="btn btn-secondary mb-2" style={{ height:'25px', backgroundColor: '#000000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center'}} variant="primary" type="submit">
+                  start tournament
                 </Button>
               </Form>
             ) : (
               <Button
                 variant="primary"
-                size="lg"
-                onClick={() => setShowNewTournamentForm(true)}
-              >
-                New Tournament
+                className="btn btn-secondary mb-2" style={{ height:'25px', backgroundColor: '#000000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center'}}
+                onClick={() => setShowNewTournamentForm(true)}>
+                new tournament
               </Button>
             )}
           </>
         )}
         {!gameStarted && !winner && (
-          <Button variant="primary" size="lg" onClick={handleBack}>
-            Back to Menu
+          <Button className="btn btn-secondary mb-2" style={{ height:'25px', backgroundColor: '#000000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center'}} variant="primary" size="lg" onClick={handleBack}>
+            back to menu
           </Button>
         )}
       </div>

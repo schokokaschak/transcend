@@ -13,18 +13,43 @@ import OnlineGameM from './OnlineGameM';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
-
+  const [notification, setNotification] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     setIsLoggedIn(!!localStorage.getItem('Token'));
   }, []);
 
- 
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    const newSocket = new WebSocket('ws://localhost:8000/ws/notification/?token=' + localStorage.getItem('Token'));
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.close();
+    };
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    if (socket == null) return;
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      console.log(data);
+      setNotification(data);
+      setTimeout(() => {
+        setNotification(null);
+      }, 5000);
+    };
+  }, [socket]);
+
 
   return (
     <Router>
       <div className="App">
+      {notification && <div className="notification" style={{position: 'fixed', top: 0, right: 0, backgroundColor: 'lightblue', padding: '10px'}}>{notification.message}</div>}
         <Routes>
           <Route
             path="/"
@@ -74,15 +99,14 @@ function App() {
               </>
             }
           />
-          <Route path="/game" element={<PingPongGame />} />
-          <Route path='/tournament' element={<Tournament />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard/:id" element={<Dashboard />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/OnlineGame" element={<OnlineGame />} />
-          <Route path='/onlineTournament' element={<OnlineTournament />} />
-          <Route path="/OnlineGameM" element={<OnlineGameM />} />
-       
+          <Route path="/game" element={<PingPongGame socket={socket} />} />
+          <Route path='/tournament' element={<Tournament socket={socket} />} />
+          <Route path="/login" element={<Login socket={socket} />} />
+          <Route path="/dashboard/:id" element={<Dashboard socket={socket} />} />
+          <Route path="/chat" element={<Chat socket={socket} />} />
+          <Route path="/OnlineGame" element={<OnlineGame socket={socket} />} />
+          <Route path='/onlineTournament' element={<OnlineTournament socket={socket} />} />
+          <Route path="/OnlineGameM" element={<OnlineGameM socket={socket} />} />
         </Routes>
       </div>
     </Router>
